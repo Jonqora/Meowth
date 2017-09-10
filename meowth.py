@@ -541,7 +541,7 @@ async def zone(ctx):
     else:
         try:
             await Meowth.add_roles(ctx.message.author, role)
-            await Meowth.send_message(ctx.message.channel, "Meowth! Added {0} to {1}!".format(ctx.message.author.mention, role.name.capitalize())))
+            await Meowth.send_message(ctx.message.channel, "Meowth! Added {0} to {1}!".format(ctx.message.author.mention, role.name.capitalize()))
         except discord.Forbidden:
             await Meowth.send_message(ctx.message.channel, _("Meowth! I can't add roles!"))
 
