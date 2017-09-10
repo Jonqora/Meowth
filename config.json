@@ -56,20 +56,4 @@
     "fairy"    : ":fairy:"
 }
 
-"//": "Role names for geographical zone numbers.",
-"zone_dict": {
-    "zone1"    : "1",
-    "zone2"    : "2",
-    "zone3"    : "3",
-    "zone4"    : "4",
-    "zone5"    : "5",
-    "zone6"    : "6",
-    "zone7"    : "7",
-    "zone8"    : "8",
-    "zone9"    : "9",
-    "zone10"    : "10",
-    "zone11"    : "11",
-    "zone12"    : "12"
-}
-
 }
