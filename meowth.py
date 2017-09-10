@@ -533,7 +533,7 @@ async def zone(ctx):
     # Check if zone is one of those defined in the zone_dict
 
     if entered_zone not in list(config['zone_dict'].keys()):
-        await Meowth.send_message(ctx.message.channel, "Meowth! \"{0}\" isn't a valid zone! Try {1}".format(entered_zone, zone_msg))
+        await Meowth.send_message(ctx.message.channel, "Meowth! \"{0}\" isn't a valid zone!".format(entered_zone))
         return
     # Check if the role is configured on the server
     elif role is None:
