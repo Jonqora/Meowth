@@ -492,6 +492,60 @@ End admin commands
 
 
 @Meowth.command(pass_context = True)
+async def zone(ctx):
+    """Manage zone subscriptions
+    Usage: !zone <+/-> <zone_name>
+    Roles for each zone have to be created manually beforehand by the server administrator."""
+
+    server = ctx.message.server
+    toprole = server.me.top_role.name
+    position = server.me.top_role.position
+    high_roles = []
+
+    for zone in config['zone_dict'].keys():
+        temp_role = discord.utils.get(ctx.message.server.roles, name=zone)
+        if temp_role.position > position:
+            high_roles.append(temp_role.name)
+
+    if high_roles:
+        await Meowth.send_message(ctx.message.channel, _("Meowth! My roles are ranked lower than the following zone roles: **{0}**\nPlease get an admin to move my roles above them!").format(', '.join(high_roles)))
+        return
+
+    role = None
+    entered_zone = ctx.message.content[6:].lower()
+    role = discord.utils.get(ctx.message.server.roles, name=entered_zone)
+
+    # Check if user already belongs to a zone role by
+    # getting the role objects of all zones in zone_dict and
+    # checking if the message author has any of them.
+    for zone in config['zone_dict'].keys():
+        temp_role = discord.utils.get(ctx.message.server.roles, name=zone)
+        # If the role is valid,
+        if temp_role:
+            # and the user has this role,
+            if temp_role in ctx.message.author.roles:
+                # then report that a role is already assigned
+                await Meowth.send_message(ctx.message.channel, _("Meowth! You are already subscribed in that zone!"))
+                return
+        # If the role isn't valid, something is misconfigured, so fire a warning.
+        else:
+            print(_("WARNING: Role {0} in zone_dict not configured as a role on the server!").format(zone))
+    # Check if zone is one of those defined in the zone_dict
+
+    if entered_zone not in list(config['zone_dict'].keys()):
+        await Meowth.send_message(ctx.message.channel, "Meowth! \"{0}\" isn't a valid zone! Try {1}".format(entered_zone, zone_msg))
+        return
+    # Check if the role is configured on the server
+    elif role is None:
+        await Meowth.send_message(ctx.message.channel, _("Meowth! The \"{0}\" role isn't configured on this server! Contact an admin!").format(entered_zone))
+    else:
+        try:
+            await Meowth.add_roles(ctx.message.author, role)
+            await Meowth.send_message(ctx.message.channel, "Meowth! Added {0} to Zone {1}! {2}".format(ctx.message.author.mention, role.name.capitalize(), parse_emoji(ctx.message.server, config['zone_dict'][entered_zone])))
+        except discord.Forbidden:
+            await Meowth.send_message(ctx.message.channel, _("Meowth! I can't add roles!"))
+
+@Meowth.command(pass_context = True)
 async def team(ctx):
     """Set your team role.
 
