@@ -1,4 +1,4 @@
-import os
+﻿import os
 import asyncio
 import gettext
 import re
@@ -23,6 +23,7 @@ config = {}
 pkmn_info = {}
 type_chart = {}
 type_list = []
+zone_list = {}
 
 # Append path of this script to the path of
 # config files which we're loading.
@@ -34,6 +35,7 @@ def load_config():
     global pkmn_info
     global type_chart
     global type_list
+    global zone_list
 
     # Load configuration
     with open(os.path.join(script_path, "config.json"), "r") as fd:
@@ -53,6 +55,10 @@ def load_config():
         type_chart = json.load(fd)
     with open(os.path.join(script_path, "type_list.json"), "r") as fd:
         type_list = json.load(fd)
+
+   # Load geographical zone info
+    with open(os.path.join(script_path, "zone_list.json"), "r") as fd:
+        zone_list = json.load(fd)
 
     # Set spelling dictionary to our list of Pokemon
     spelling.set_dictionary(pkmn_info['pokemon_list'])
@@ -502,7 +508,7 @@ async def zone(ctx):
     position = server.me.top_role.position
     high_roles = []
 
-    for zone in config['zone_dict'].keys():
+    for zone in zone_list.keys():
         temp_role = discord.utils.get(ctx.message.server.roles, name=zone)
         if temp_role.position > position:
             high_roles.append(temp_role.name)
@@ -515,26 +521,23 @@ async def zone(ctx):
     entered_zone = ctx.message.content[6:].lower()
     role = discord.utils.get(ctx.message.server.roles, name=entered_zone)
 
-    # Check if user already belongs to a zone role by
-    # getting the role objects of all zones in zone_dict and
-    # checking if the message author has any of them.
-    for zone in config['zone_dict'].keys():
-        temp_role = discord.utils.get(ctx.message.server.roles, name=zone)
-        # If the role is valid,
-        if temp_role:
-            # and the user has this role,
-            if temp_role in ctx.message.author.roles:
-                # then report that a role is already assigned
-                await Meowth.send_message(ctx.message.channel, _("Meowth! You are already subscribed in that zone!"))
-                return
-        # If the role isn't valid, something is misconfigured, so fire a warning.
-        else:
-            print(_("WARNING: Role {0} in zone_dict not configured as a role on the server!").format(zone))
-    # Check if zone is one of those defined in the zone_dict
+    # Check if user already belongs to this zone role
+    # If the role is valid,
+    if temp_role:
+        # and the user has this role,
+        if temp_role in ctx.message.author.roles:
+            # then report that the role is already assigned
+            await Meowth.send_message(ctx.message.channel, _("Meowth! You are already subscribed in that zone!"))
+            return
+    # If the role isn't valid, something is misconfigured, so fire a warning.
+    else:
+        print(_("WARNING: Role {0} in zone_list not configured as a role on the server!").format(zone))
 
-    if entered_zone not in list(config['zone_dict'].keys()):
+    # Check if zone is one of those defined in the zone_list
+    if entered_zone not in list(zone_list.keys()):
         await Meowth.send_message(ctx.message.channel, "Meowth! \"{0}\" isn't a valid zone!".format(entered_zone))
         return
+
     # Check if the role is configured on the server
     elif role is None:
         await Meowth.send_message(ctx.message.channel, _("Meowth! The \"{0}\" role isn't configured on this server! Contact an admin!").format(entered_zone))
