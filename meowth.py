@@ -23,7 +23,8 @@ config = {}
 pkmn_info = {}
 type_chart = {}
 type_list = []
-zone_list = {}
+zone_roles = {}
+zone_dict = {}
 
 # Append path of this script to the path of
 # config files which we're loading.
@@ -35,7 +36,8 @@ def load_config():
     global pkmn_info
     global type_chart
     global type_list
-    global zone_list
+    global zone_roles
+    global zone_dict
 
     # Load configuration
     with open(os.path.join(script_path, "config.json"), "r") as fd:
@@ -56,9 +58,22 @@ def load_config():
     with open(os.path.join(script_path, "type_list.json"), "r") as fd:
         type_list = json.load(fd)
 
-   # Load geographical zone info
-    with open(os.path.join(script_path, "zone_list.json"), "r") as fd:
-        zone_list = json.load(fd)
+    # Load geographical zone info
+        #INFORMATION on file structure used by zone_roles.json
+        #Customizable. Contains the 'all' role, plus as many zones as regions
+        #Created as a dict for fast lookup; each key stores a list of values
+        # key : discord_role | zone_name | image_url
+    with open(os.path.join(script_path, "zone_roles.json"), "r") as fd:
+        zone_roles = json.load(fd)
+
+    # Load supplemental zone commands
+        #INFORMATION on file structure used by zone_dict.json
+        #Editable dictionary. Allows the creation of synonyms and multi-zone commands!
+        #Each key stores up to two items. First, lists at least one corresponding zone.
+        #These listed values correspond to keys in the zone_roles.json file
+        #Second, optionally includes an image file to use for multi-zone commands.
+    with open(os.path.join(script_path, "zone_roles.json"), "r") as fd:
+        zone_roles = json.load(fd)
 
     # Set spelling dictionary to our list of Pokemon
     spelling.set_dictionary(pkmn_info['pokemon_list'])
@@ -508,8 +523,9 @@ async def zone(ctx):
     position = server.me.top_role.position
     high_roles = []
 
-    for zone in zone_list.keys():
-        temp_role = discord.utils.get(ctx.message.server.roles, name=zone)
+    for zone in zone_roles.values():
+        #these dict values are lists; pass each list's first item to 'name='
+        temp_role = discord.utils.get(ctx.message.server.roles, name=zone[0])
         if temp_role.position > position:
             high_roles.append(temp_role.name)
 
@@ -531,10 +547,10 @@ async def zone(ctx):
             return
     # If the role isn't valid, something is misconfigured, so fire a warning.
     else:
-        print(_("WARNING: Role {0} in zone_list not configured as a role on the server!").format(zone))
+        print(_("WARNING: Role {0} in zone_roles not configured as a role on the server!").format(zone))
 
-    # Check if zone is one of those defined in the zone_list
-    if entered_zone not in list(zone_list.keys()):
+    # Check if zone is one of those defined in the zone_roles
+    if entered_zone not in list(zone_roles.keys()):
         await Meowth.send_message(ctx.message.channel, "Meowth! \"{0}\" isn't a valid zone!".format(entered_zone))
         return
 

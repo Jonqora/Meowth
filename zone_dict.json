@@ -1,0 +1,62 @@
+{
+    "saskatoon":  {"zone_id" : ["all"]  },
+    "disable":  {"zone_id" : ["all"]  },
+    "off":  {"zone_id" : ["all"]  },
+
+    "zone1":  {"zone_id" : [1]  },
+    "zone2":  {"zone_id" : [2]  },
+    "zone3":  {"zone_id" : [3]  },
+    "zone4":  {"zone_id" : [4]  },
+    "zone5":  {"zone_id" : [5]  },
+    "zone6":  {"zone_id" : [6]  },
+    "zone7":  {"zone_id" : [7]  },
+    "zone8":  {"zone_id" : [8]  },
+    "zone9":  {"zone_id" : [9]  },
+    "zone10": {"zone_id" : [10] },
+    "zone11": {"zone_id" : [11] },
+    "zone12": {"zone_id" : [12] },
+
+
+    "sutherland-northeast":   {"zone_id" : [1]  },
+        "sutherland":         {"zone_id" : [1]  },
+
+    "lakewood-southeast":     {"zone_id" : [2]  },
+        "lakewood":           {"zone_id" : [2]  },
+
+    "university":             {"zone_id" : [3]  },
+
+    "preston":                {"zone_id" : [4]  },
+
+    "broadway-south":         {"zone_id" : [5]  },
+        "broadway":           {"zone_id" : [5]  },
+
+    "riversdale-holiday":     {"zone_id" : [6]  },
+        "riversdale":         {"zone_id" : [6]  },
+
+    "fairhaven":              {"zone_id" : [7]  },
+
+    "confederation-west":     {"zone_id" : [8]  },
+        "confederation":      {"zone_id" : [8]  },
+
+    "mayfair":                {"zone_id" : [9]  },
+
+    "downtown core":          {"zone_id" : [10] },
+        "downtown":           {"zone_id" : [10] },
+
+    "centre-north":           {"zone_id" : [11] },
+        "centre":             {"zone_id" : [11] },
+
+    "lawson-north":           {"zone_id" : [12] },
+        "lawson":             {"zone_id" : [12] },
+
+
+    "eastside": {
+      "zone_id" : [1,2,3,4,5],
+      "map_url" : "https://i.imgur.com/whBIkEi.png"
+    },
+    "westside": {
+      "zone_id" : [6,7,8,9,10,11,12],
+      "map_url" : "https://i.imgur.com/wQq9bSO.png"
+    }
+
+}
