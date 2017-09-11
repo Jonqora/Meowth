@@ -14,6 +14,19 @@
     "zone10": {"zone_id" : [10] },
     "zone11": {"zone_id" : [11] },
     "zone12": {"zone_id" : [12] },
+    
+    "zone 1":  {"zone_id" : [1]  },
+    "zone 2":  {"zone_id" : [2]  },
+    "zone 3":  {"zone_id" : [3]  },
+    "zone 4":  {"zone_id" : [4]  },
+    "zone 5":  {"zone_id" : [5]  },
+    "zone 6":  {"zone_id" : [6]  },
+    "zone 7":  {"zone_id" : [7]  },
+    "zone 8":  {"zone_id" : [8]  },
+    "zone 9":  {"zone_id" : [9]  },
+    "zone 10": {"zone_id" : [10] },
+    "zone 11": {"zone_id" : [11] },
+    "zone 12": {"zone_id" : [12] },
 
 
     "sutherland-northeast":   {"zone_id" : [1]  },
