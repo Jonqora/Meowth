@@ -523,15 +523,78 @@ async def zone(ctx):
     position = server.me.top_role.position
     high_roles = []
 
+    #make sure ALL zone roles are below this bot in hierarchy
     for zone in zone_roles.values():
         #these dict values are lists; pass each list's first item to 'name='
         temp_role = discord.utils.get(ctx.message.server.roles, name=zone[0])
         if temp_role.position > position:
             high_roles.append(temp_role.name)
-
     if high_roles:
         await Meowth.send_message(ctx.message.channel, _("Meowth! My roles are ranked lower than the following zone roles: **{0}**\nPlease get an admin to move my roles above them!").format(', '.join(high_roles)))
         return
+
+"""
+Outline for code additions BEGINS
+"""
+
+#something up here. Check first that the command has the proper structure
+    #zone add, zone remove, zone +, zone -
+    #maybe also allow a few other commands?
+        #!zone map (sends embedded image of zones)
+            #OPTIONAL !zone map <zone_command> (uses name to find the image file)
+        #!zone list (sends a list of current zone subscriptions)
+            #needs to prioritize "anyzone", otherwise composes a list of all (needs A-Z sort)
+
+#next check that the command given in that structure is in our lists
+    #zone_dict.get(<command>,<command>) is [in zone_roles] (actual syntax, checks if it's in keys)
+    #zone_dict.get(<command>,<command>) <-- in fact, this should be a variable, it's so important!
+
+#IF commanded "all" -> assign role "anyzone"     zone_dict.get(<command>,<command>)
+    #then send a message
+        #"Zone filtering disabled. You'll get raid channels and notifications from |ALL of Saskatoon|"
+
+#ELSE (+/add) (anything else), first remove the "anyzone" filter before proceeding
+    #check - is this a new filter? ("anyzone" role was assigned)
+
+    #IF "anyzone" was assigned (filter to be created)
+        #remove role "anyzone"
+        #send (or prepare to send) a message
+            #"Zone filtering enabled! You'll only see raid channels and notifications for these locations:"
+
+    #ELIF "anyzone" was NOT assigned to the user (filter to be modified)
+        #no need to remove anyzone heh
+        #send (or prepare to send) a message
+            #"Zone filtering changed! You'll start seeing raid channels and notifications for these locations:
+
+    #map_url = None
+    #(almost forgot - grab the map_url if a multi-zone command has one). Save as a variable.
+
+    #FOR LOOP time! FOR every TASKzone in <RESULT FROM zone_dict.get(<command>,<command>) (after , gives default value, ergo keep commandinput if not in dictionary)
+                    #that thing will give a list e.g. [3] or [1,2,3,4,5]
+    #need an empty list: added_roles = []
+        #prepare to assign a role! zone_roles.get(TASKzone)[0] -> gives an ordered list & grabs the first item
+        #IF not already assigned to the user...
+            #1. assign it to the user
+            #2. append it (TASKzone) to the added_roles list
+            #3. append its name to a message-preparation list (could be the same, TBH)
+
+        #one more thing... check that the user has at least ONE of the zone roles.
+        #IF NOT: assign them the "anyzone" role. (+follow proceedure for disabling zone filters)
+
+#ASSEMBLE ALL OF THE RESPONSE OUTPUT - 4 components to each
+#<A what did zone filtering do?> <B what does that mean?>
+#<C list in separate lines every affected region> #<D embed a map image if there is one>
+    #ERROR - No zones added. You're already in those zones! / No zones removed. You're not in those zones!
+    #A - Zone filtering [ENABLED/DISABLED/changed]
+    #B - "You'll [GET/ONLY SEE/START SEEING/STOP SEEING] raid channels and notifications for <eastside> <sutherland> <zone2>"
+    #C - A-Z sort! can be empty (if it is, there better be feedback in A or B)
+    #D - optional. ignore if empty AND only use it if adding.
+
+
+"""
+Outline for code additions ENDS
+"""
+
 
     role = None
     entered_zone = ctx.message.content[6:].lower()

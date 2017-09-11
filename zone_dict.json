@@ -1,7 +1,6 @@
 {
     "saskatoon":  {"zone_id" : ["all"]  },
     "disable":  {"zone_id" : ["all"]  },
-    "off":  {"zone_id" : ["all"]  },
 
     "zone1":  {"zone_id" : [1]  },
     "zone2":  {"zone_id" : [2]  },
