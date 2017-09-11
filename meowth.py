@@ -23,7 +23,7 @@ config = {}
 pkmn_info = {}
 type_chart = {}
 type_list = []
-zone_roles = {}
+zone_roles = []
 zone_dict = {}
 
 # Append path of this script to the path of
@@ -70,10 +70,10 @@ def load_config():
         #INFORMATION on file structure used by zone_dict.json
         #Editable dictionary. Allows the creation of synonyms and multi-zone commands!
         #Each key stores up to two items. First, lists at least one corresponding zone.
-        #These listed values correspond to keys in the zone_roles.json file
+        #These listed values correspond to list[0] in the zone_roles.json file
         #Second, optionally includes an image file to use for multi-zone commands.
-    with open(os.path.join(script_path, "zone_roles.json"), "r") as fd:
-        zone_roles = json.load(fd)
+    with open(os.path.join(script_path, "zone_dict.json"), "r") as fd:
+        zone_dict = json.load(fd)
 
     # Set spelling dictionary to our list of Pokemon
     spelling.set_dictionary(pkmn_info['pokemon_list'])
@@ -526,42 +526,41 @@ async def map(ctx):
     Usage: !zone map
     """
     #Provides an image with a map of numbered zones.
-    map_img_url = "https://i.imgur.com/XAz5a72.jpg" #This part embeds the sprite
+    map_img_url = "https://i.imgur.com/XAz5a72.jpg" #This part embeds the image
     map_embed = discord.Embed(colour=discord.Colour(0x00a701))
     map_embed.set_image(url=map_img_url)
     map_embed.set_footer(text=("Numbered map of all raid zones in Saskatoon"))
     await Meowth.send_message(ctx.message.channel, content=_("Here's a map, {0}! Filter by zone using **`!zone add`** or **`!zone remove`** followed by a number.").format(ctx.message.author.mention),embed=map_embed)
+
+    #COMMENTED OUT - idea for added feature
+    #Build inputs for the !zone map command that accept individual zone numbers.
+    #user-input gives a value "zone_number"
+    #need to check that input is numerical, integer, and =< the list's last value zone_roles[-1][0]
+    #map_img_url = zone_roles[zone_number][3] #This part embeds the image
+    #map_embed = discord.Embed(colour=discord.Colour(0x00a701))
+    #map_embed.set_image(url=map_img_url)
+    #map_embed.set_footer(text=("Map of Zone {} | {}".format(zone_roles[zone_number][0],zone_roles[zone_number][2])))
+    #await Meowth.send_message(ctx.message.channel, content=_("Here's the Zone {0} map, {1}! Type and send **`!zone add {0}`** to subscribe to raid channels and notifications in this area.").format(zone_roles[zone_number][0],ctx.message.author.mention),embed=map_embed)
+
+
 
 @zone.command(pass_context=True)
 async def list(ctx):
     """Sends user a current zone subscription list.
     Usage: !zone list
     """
-    await Meowth.say("Would you like a list of the raid zones you joined?")
-    #for role in [1,2]:
-    #    await Meowth.say("Zone {0} | <Description>".format(role))
-
-
-    #assigned_roles = ["zone3","zone4","anyzone"]
-    #otw_list.append(trainer)
-    #await Meowth.send_message(message.channel, content = "Trainers {0}: make sure place!".format(", ".join(otw_list)) )
-
-    #sortable_zone_list = []
-    #sortable_zone_list = zone_roles.keys()
-    #sortable_zone_list.sort()
-
+    await Meowth.say("{}, would you like a list of the raid zones you joined?".format(ctx.message.author.mention))
+    #creates an empty list to populate with response message items
     zone_message_list = []
-    for key in zone_roles.keys():
-        if not key == "all":
-            if discord.utils.get(ctx.message.author.roles, name=zone_roles[key][0]):
-                zone_message_list.append("Zone {0} | {1}".format(key,zone_roles[key][1]))
-                #await Meowth.say(("Zone {0} | {1}").format(key,zone_roles[key][1]))
+    #constructs a for loop which will omit the entire first element (re. "anyzone") in zone_roles nested array
+    for mini_list in zone_roles[1: ]:
+        #Look to see if user has a role assigned that matches discord role at [1]
+        if discord.utils.get(ctx.message.author.roles, name=mini_list[1]):
+            #Format the user's zone roles to build a response message enumerating those zones
+            zone_message_list.append("Zone {} | {}".format(mini_list[0],mini_list[2]))
+    #Send response message with zone descriptions joined together
+    await Meowth.send_message(ctx.message.channel, content = "**HERE'S YOUR LIST:** \n{0}".format("\n".join(zone_message_list)))
 
-    await Meowth.send_message(ctx.message.channel, content = "**HERE'S YOUR LIST:** \n{0}".format("\n".join(zone_message_list)) )
-                #role = discord.utils.get(ctx.message.server.roles, name=entered_zone)
-                #for zone in zone_roles.values():
-                    #these dict values are lists; pass each list's first item to 'name='
-                    #temp_role = discord.utils.get(ctx.message.server.roles, name=zone[0])
 
 @zone.command()
 async def add():
@@ -582,7 +581,14 @@ async def disable():
     """Manage zone subscriptions: turn off zone filtering
     Usage: !zone disable
     This command assigns the 'anyzone' role, which has read permissions for all raid channels."""
-    await Meowth.say("Zone filtering turned off.")
+    await Meowth.say("Zone filtering disabled.")
+
+@zone.command()
+async def enable():
+    """Manage zone subscriptions: turn on zone filtering
+    Usage: !zone enable
+    This command revokes the 'anyzone' role. Useable only if the user has at least one zone role?"""
+    await Meowth.say("Zone filtering enabled.")
 
 #something up here. Check first that the command has the proper structure
     #zone add, zone remove, zone +, zone -
