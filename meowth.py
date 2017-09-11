@@ -314,9 +314,8 @@ async def on_ready():
     await channel_cleanup()
     for server in Meowth.servers:
         server_dict[server] = server_dict.pop(server)
-        await Meowth.send_message(server.owner, "Meowth! That's right! I've been rebooted! You don't need to do anything this time, but you may find some commands don't respond in currently active channels, or the channels may not delete as expected. Sorry for any inconvenience!")
-
-
+        #await Meowth.send_message(server.owner, "Meowth! That's right! I've been rebooted! You don't need to do anything this time, but you may find some commands don't respond in currently active channels, or the channels may not delete as expected. Sorry for any inconvenience!")
+        #await Meowth.send_message(server.owner, "Sorry, {}!".format(server.owner.mention))
 
 @Meowth.event
 async def on_server_join(server):
@@ -510,6 +509,8 @@ async def save(ctx):
 End admin commands
 
 """
+
+
 """
 Outline for code additions BEGINS
 """
@@ -562,12 +563,41 @@ async def list(ctx):
     await Meowth.send_message(ctx.message.channel, content = "**HERE'S YOUR LIST:** \n{0}".format("\n".join(zone_message_list)))
 
 
-@zone.command()
-async def add():
+@zone.command(pass_context=True)
+async def add(ctx):
     """Manage zone subscriptions: add new
     Usage: !zone add <zone_number>
     Roles for each zone have to be created manually beforehand by the server administrator."""
     await Meowth.say("I added you to a zone!")
+
+    server = ctx.message.server #PLAN FOR FUTURE - should pull this out to create its own helper function
+    toprole = server.me.top_role.name
+    position = server.me.top_role.position
+    high_roles = []
+
+    #make sure ALL zone roles are below this bot in hierarchy
+    for mini_list in zone_roles:
+        #these values are lists; pass each list's second item (discord role) to 'name='
+        temp_role = discord.utils.get(ctx.message.server.roles, name=mini_list[1])
+        if temp_role.position > position:
+            high_roles.append(temp_role.name)
+    if high_roles:
+        await Meowth.send_message(ctx.message.channel, _("ERROR! My roles are ranked lower than the following zone roles: **{0}**\nPlease get an admin to move my roles above them!").format(', '.join(high_roles)))
+
+    else:
+                #This part parses the user's input and prepares to add the appropriate zones
+        user_input = ctx.message.content[10:].lower()
+        #Check to make sure user input matches the zone dictionary
+        if zone_dict.get(user_input):
+            #Check that the dict entry contains "zone_id" property
+            if zone_dict.get(user_input).get("zone_id"):
+                #List of zone IDs - we will fill it with the result of zone_dict lookup
+                zone_ids = zone_dict.get(user_input).get("zone_id")
+                await Meowth.say("I need some code to assign those roles.")
+        else:
+            await Meowth.say("I don't know what zone you mean.")
+        await Meowth.say("Your input: {}".format(user_input))
+        await Meowth.say("Your zone IDs: {}".format(zone_ids))
 
 @zone.command()
 async def remove():
@@ -654,20 +684,7 @@ async def zone_add(ctx):
     Usage: !zone <+/-> <zone_name>
     Roles for each zone have to be created manually beforehand by the server administrator."""
 
-    server = ctx.message.server
-    toprole = server.me.top_role.name
-    position = server.me.top_role.position
-    high_roles = []
 
-    #make sure ALL zone roles are below this bot in hierarchy
-    for zone in zone_roles.values():
-        #these dict values are lists; pass each list's first item to 'name='
-        temp_role = discord.utils.get(ctx.message.server.roles, name=zone[0])
-        if temp_role.position > position:
-            high_roles.append(temp_role.name)
-    if high_roles:
-        await Meowth.send_message(ctx.message.channel, _("Meowth! My roles are ranked lower than the following zone roles: **{0}**\nPlease get an admin to move my roles above them!").format(', '.join(high_roles)))
-        return
 
 
 
