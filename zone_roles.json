@@ -1,15 +1,15 @@
-{
-    "all": ["anyzone","Saskatoon",           "https://i.imgur.com/XAz5a72.jpg"],
-    "1"  : ["zone1",  "Sutherland-Northeast","https://i.imgur.com/XAz5a72.jpg"],
-    "2"  : ["zone2",  "Lakewood-Southeast",  "https://i.imgur.com/XAz5a72.jpg"],
-    "3"  : ["zone3",  "University",          "https://i.imgur.com/XAz5a72.jpg"],
-    "4"  : ["zone4",  "Preston",             "https://i.imgur.com/XAz5a72.jpg"],
-    "5"  : ["zone5",  "Broadway-South",      "https://i.imgur.com/XAz5a72.jpg"],
-    "6"  : ["zone6",  "Riversdale-Holiday",  "https://i.imgur.com/XAz5a72.jpg"],
-    "7"  : ["zone8",  "Confederation-West",  "https://i.imgur.com/XAz5a72.jpg"],
-    "8"  : ["zone7",  "Fairhaven",           "https://i.imgur.com/XAz5a72.jpg"],
-    "9"  : ["zone9",  "Mayfair",             "https://i.imgur.com/XAz5a72.jpg"],
-    "10" : ["zone10", "Downtown Core",       "https://i.imgur.com/XAz5a72.jpg"],
-    "11" : ["zone11", "Centre-North",        "https://i.imgur.com/XAz5a72.jpg"],
-    "12" : ["zone12", "Lawson-North",        "https://i.imgur.com/XAz5a72.jpg"]
-}
+[
+    ["all", "anyzone","Saskatoon",           "https://i.imgur.com/XAz5a72.jpg"],
+    [1,     "zone1",  "Sutherland-Northeast","https://i.imgur.com/XAz5a72.jpg"],
+    [2,     "zone2",  "Lakewood-Southeast",  "https://i.imgur.com/XAz5a72.jpg"],
+    [3,     "zone3",  "University",          "https://i.imgur.com/XAz5a72.jpg"],
+    [4,     "zone4",  "Preston",             "https://i.imgur.com/XAz5a72.jpg"],
+    [5,     "zone5",  "Broadway-South",      "https://i.imgur.com/XAz5a72.jpg"],
+    [6,     "zone6",  "Riversdale-Holiday",  "https://i.imgur.com/XAz5a72.jpg"],
+    [7,     "zone8",  "Confederation-West",  "https://i.imgur.com/XAz5a72.jpg"],
+    [8,     "zone7",  "Fairhaven",           "https://i.imgur.com/XAz5a72.jpg"],
+    [9,     "zone9",  "Mayfair",             "https://i.imgur.com/XAz5a72.jpg"],
+    [10,    "zone10", "Downtown Core",       "https://i.imgur.com/XAz5a72.jpg"],
+    [11,    "zone11", "Centre-North",        "https://i.imgur.com/XAz5a72.jpg"],
+    [12,    "zone12", "Lawson-North",        "https://i.imgur.com/XAz5a72.jpg"]
+]
