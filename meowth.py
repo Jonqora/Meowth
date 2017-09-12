@@ -593,7 +593,7 @@ async def add(ctx):
 
     #proceed if all the needed roles are valid and accessible
     else:
-                #This part parses the user's input and prepares to add the appropriate zones
+        #This part parses the user's input and prepares to add the appropriate zones
         user_input = ctx.message.content[10:].lower()
         zone_ids = []
         #Check to make sure user input matches the zone dictionary
@@ -602,14 +602,20 @@ async def add(ctx):
             if zone_dict.get(user_input).get("zone_id"):
                 #List of zone IDs - we will fill it with the result of zone_dict lookup
                 zone_ids = zone_dict.get(user_input).get("zone_id")
-                await Meowth.say("Adding roles...")
+                listen_message = await Meowth.say("Adding roles")
                 await Meowth.send_typing(ctx.message.channel)
-                #await Meowth.delete_message("Adding roles...")
+                await asyncio.sleep(0.1)
+                await Meowth.edit_message(listen_message,"Adding roles.")
+                await asyncio.sleep(0.25)
+                await Meowth.edit_message(listen_message,"Adding roles..")
+                await asyncio.sleep(0.25)
+                await Meowth.edit_message(listen_message,"Adding roles...")
             else:
                 await Meowth.say("ERROR: missing ID in zone_dict.")
         else:
             await Meowth.say("I don't know what zone you mean.")
-        await Meowth.say("`Your input: {} | Your zone IDs: {}`".format(user_input,zone_ids))
+        #LOOK HERE for debugging, uncomment the message.
+        #await Meowth.say("`Your input: {} | Your zone IDs: {}`".format(user_input,zone_ids))
         #Now we have converted the user's input to a list of zones to try adding.
 
         #Next, we iterate through the list of zones to assign them
@@ -635,64 +641,131 @@ async def add(ctx):
                 try:
                     await Meowth.add_roles(ctx.message.author, temp_role)
                 except discord.Forbidden:
+                    await Meowth.delete_message(listen_message)
                     await Meowth.send_message(ctx.message.channel, _("Meowth! I can't add roles!"))
                 #append the role changed and info to toggled_roles
                 toggled_roles.append("Zone {} | {}".format(zone_info[0],zone_info[2]))
         if unchanged_roles:
-            await Meowth.say("You're already in Zone {}.".format(", ".join(unchanged_roles)))
+            await Meowth.edit_message(listen_message,"You're already in Zone {}.".format(", ".join(unchanged_roles)))
+            #listen message is gone now
+            listen_message = False
         if toggled_roles:
-            await Meowth.send_message(ctx.message.channel, content = "Done! I added {0} to \n{1}".format(ctx.message.author.mention,"\n".join(toggled_roles)))
+            await Meowth.send_message(ctx.message.channel, content = "I added {0} to \n{1}".format(ctx.message.author.mention,"\n".join(toggled_roles)))
+            #dont try to change the listen_message if it's already gone
+            if listen_message:
+                await Meowth.edit_message(listen_message,"Complete.")
         else:
-            await Meowth.say("No roles added for {}.".format(ctx.message.author.mention))
+            await Meowth.say("No zones added for {}.".format(ctx.message.author.mention))
 
-'''
-    # Check if user already belongs to this zone role
-    # If the role is valid,
-    if temp_role:
-        # and the user has this role,
-        if temp_role in ctx.message.author.roles:
-            # then report that the role is already assigned
-            await Meowth.send_message(ctx.message.channel, _("Meowth! You are already subscribed in that zone!"))
-            return
-    # If the role isn't valid, something is misconfigured, so fire a warning.
-    else:
-        print(_("WARNING: Role {0} in zone_roles not configured as a role on the server!").format(zone))
 
-    # Check if zone is one of those defined in the zone_roles
-    if entered_zone not in list(zone_roles.keys()):
-        await Meowth.send_message(ctx.message.channel, "Meowth! \"{0}\" isn't a valid zone!".format(entered_zone))
-        return
-
-    # Check if the role is configured on the server
-    elif role is None:
-        await Meowth.send_message(ctx.message.channel, _("Meowth! The \"{0}\" role isn't configured on this server! Contact an admin!").format(entered_zone))
-    else:
-        try:
-            await Meowth.add_roles(ctx.message.author, role)
-            await Meowth.send_message(ctx.message.channel, "Meowth! Added {0} to {1}!".format(ctx.message.author.mention, role.name.capitalize()))
-        except discord.Forbidden:
-            await Meowth.send_message(ctx.message.channel, _("Meowth! I can't add roles!"))
-'''
-@zone.command()
-async def remove():
+@zone.command(pass_context=True)
+async def remove(ctx):
     """Manage zone subscriptions: remove existing
     Usage: !zone remove <zone_number>
     Roles for each zone have to be created manually beforehand by the server administrator."""
-    await Meowth.say("I removed you from a zone!")
+
+    server = ctx.message.server                                 #PLAN FOR FUTURE - could pull this out to create its own helper function? Run it with each !zone subommand routine.
+    toprole = server.me.top_role.name
+    position = server.me.top_role.position
+    high_roles = []
+    missing_roles = []
+
+    #make sure ALL zone roles exist on the server AND are below this bot in hierarchy
+    for mini_list in zone_roles:
+        #these values are lists; pass each list's second item (discord role) to 'name='
+        temp_role = discord.utils.get(ctx.message.server.roles, name=mini_list[1])
+        #are any of the needed roles missing?
+        if not temp_role:
+            missing_roles.append(temp_role.name)
+        #are any roles above bot in hierarchy?
+        if temp_role.position > position:
+            high_roles.append(temp_role.name)
+    if missing_roles:
+        await Meowth.send_message(ctx.message.channel, _("ERROR! These roles are missing on the server: **{0}**\nPlease get an admin to add them!").format(', '.join(missing_roles)))
+        #OR YO I could just add the code to create them here.
+    if high_roles:
+        await Meowth.send_message(ctx.message.channel, _("ERROR! My roles are ranked lower than the following zone roles: **{0}**\nPlease get an admin to move my roles above them!").format(', '.join(high_roles)))
+
+    #proceed if all the needed roles are valid and accessible
+    else:
+        #This part parses the user's input and prepares to add the appropriate zones
+        user_input = ctx.message.content[13:].lower()
+        zone_ids = []
+        #Check to make sure user input matches the zone dictionary
+        if zone_dict.get(user_input):
+            #Check that the dict entry contains "zone_id" property
+            if zone_dict.get(user_input).get("zone_id"):
+                #List of zone IDs - we will fill it with the result of zone_dict lookup
+                zone_ids = zone_dict.get(user_input).get("zone_id")
+                listen_message = await Meowth.say("Removing roles")
+                await Meowth.send_typing(ctx.message.channel)
+                await asyncio.sleep(0.1)
+                await Meowth.edit_message(listen_message,"Removing roles.")
+                await asyncio.sleep(0.25)
+                await Meowth.edit_message(listen_message,"Removing roles..")
+                await asyncio.sleep(0.25)
+                await Meowth.edit_message(listen_message,"Removing roles...")
+            else:
+                await Meowth.say("ERROR: missing ID in zone_dict.")
+        else:
+            await Meowth.say("I don't know what zone you mean.")
+        #LOOK HERE for debugging, uncomment the message.
+        #await Meowth.say("`Your input: {} | Your zone IDs: {}`".format(user_input,zone_ids))
+        #Now we have converted the user's input to a list of zones to try adding.
+
+        #Next, we iterate through the list of zones to assign them
+        zone_info = []
+        toggled_roles = []
+        unchanged_roles = []
+        for zone in zone_ids:
+            #grab the list item to save processing time
+            zone_info = zone_roles[zone]
+                #list lookup and make sure it matches [0]
+                #####if zone == zone_info[0]:
+                #####    Meowth.say("Yes, it matches!")
+            #retrieve the matching role on the server
+            temp_role = discord.utils.get(ctx.message.server.roles, name=zone_info[1]) #SPEED ISSUE - maybe grab a list early of all zone zoles.
+            #already checked with mising_roles! Any role name grabbed from zone_roles[][1] is guaranteed valid
+
+            # if role is (already) assigned to user
+            if temp_role not in ctx.message.author.roles:
+                #tell user if they don't have role they wanted to remove
+                unchanged_roles.append(zone_info[1][4: ]) #grab the number of the zone, but as a string
+            else: #that is, they DO have the role assigned
+                #revoke that role from the user
+                try:
+                    await Meowth.remove_roles(ctx.message.author, temp_role)
+                except discord.Forbidden:
+                    await Meowth.delete_message(listen_message)
+                    await Meowth.send_message(ctx.message.channel, _("Meowth! I can't remove roles!"))
+                #append the role changed and info to toggled_roles
+                toggled_roles.append("Zone {} | {}".format(zone_info[0],zone_info[2]))
+        if unchanged_roles:
+            await Meowth.edit_message(listen_message,"You weren't in Zone {}.".format(", ".join(unchanged_roles)))
+            #listen message is gone now
+            listen_message = False
+        if toggled_roles:
+            await Meowth.send_message(ctx.message.channel, content = "I removed {0} from \n{1}".format(ctx.message.author.mention,"\n".join(toggled_roles)))
+            #dont try to change the listen_message if it's already gone
+            if listen_message:
+                await Meowth.edit_message(listen_message,"Complete.")
+        else:
+            await Meowth.say("No zones removed for {}.".format(ctx.message.author.mention))
+
 
 @zone.command()
 async def disable():
     """Manage zone subscriptions: turn off zone filtering
     Usage: !zone disable
     This command assigns the 'anyzone' role, which has read permissions for all raid channels."""
-    await Meowth.say("Zone filtering disabled.")
+    await Meowth.say("Zone filtering disabled. This command doesn't work yet!")
 
 @zone.command()
 async def enable():
     """Manage zone subscriptions: turn on zone filtering
     Usage: !zone enable
     This command revokes the 'anyzone' role. Useable only if the user has at least one zone role?"""
-    await Meowth.say("Zone filtering enabled.")
+    await Meowth.say("Zone filtering enabled. This command doesn't work yet!")
 
 #something up here. Check first that the command has the proper structure
     #zone add, zone remove, zone +, zone -
